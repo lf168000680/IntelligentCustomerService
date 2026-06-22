@@ -414,7 +414,7 @@ async function fetchSystemStatus() {
 
     systemRunning.value = data?.running ?? false
     serverOnline.value = true // server responds = online
-    dbConnected.value = data?.database?.status === 'connected' || data?.dbConnected ?? false
+    dbConnected.value = (data?.database?.status === 'connected' || data?.dbConnected) ?? false
     msgBusSessions.value = data?.messageBus?.activeSessions ?? data?.activeSessions ?? 0
     uptime.value = data?.uptime ?? null
 

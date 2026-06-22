@@ -127,6 +127,11 @@ async def startup():
     )
     logger.info("Core Engine ready")
 
+    # 注入到 app.state 供所有路由使用
+    app.state.engine = engine
+    app.state.llm_router = llm_router
+    app.state.persona = persona
+
     # Initialize agent tools
     try:
         from .tools import init_tools
@@ -183,8 +188,9 @@ async def startup():
     # 9. Message Bus
     message_bus = MessageBus(
         engine=engine,
-        db_factory=None,  # 后续补充
+        db_factory=None,
     )
+    app.state.message_bus = message_bus
     logger.info("Message Bus ready")
 
     # 6. Knowledge Pipeline
@@ -196,6 +202,7 @@ async def startup():
 
     # 7. Session Manager
     session_manager = SessionManager()
+    app.state.session_manager = session_manager
 
     # 8. Scheduler
     scheduler = JobScheduler(
