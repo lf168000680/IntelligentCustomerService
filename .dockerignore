@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.git
+.env
+*.db
+node_modules
+browser_profiles
+data
+logs
+venv
+.venv

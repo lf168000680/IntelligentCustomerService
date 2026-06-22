@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.whl
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+!.env.example
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Data
+data/
+logs/
+*.log
+
+# Browser profiles
+browser_profiles/
+
+# Node
+node_modules/
+gui/dist/
+
+# Docker
+.docker/
+
+# Encryption key
+data/.encryption_key
+
+# MCP config (generated at runtime)
+config/mcp_servers.json

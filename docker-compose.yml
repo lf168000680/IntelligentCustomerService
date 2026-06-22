@@ -1,0 +1,85 @@
+
+
+services:
+  # ===== 数据库 =====
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: kefu-postgres
+    environment:
+      POSTGRES_DB: kefu
+      POSTGRES_USER: kefu
+      POSTGRES_PASSWORD: kefu_secret_change_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kefu"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: kefu-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ===== 后端服务 =====
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: kefu-server
+    env_file: .env
+    ports:
+      - "8800:8800"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./server:/app/server
+      - ./config:/app/config
+      - browser_profiles:/app/browser_profiles
+    restart: unless-stopped
+    command: python main.py
+
+  # ===== Playwright 浏览器服务 =====
+  playwright:
+    image: mcr.microsoft.com/playwright:latest
+    container_name: kefu-playwright
+    env_file: .env
+    volumes:
+      - browser_profiles:/profiles
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+  # ===== GUI 管理面板 =====
+  gui:
+    build:
+      context: ./gui
+      dockerfile: Dockerfile
+    container_name: kefu-gui
+    ports:
+      - "8801:80"
+    depends_on:
+      - server
+    volumes:
+      - ./gui/dist:/usr/share/nginx/html
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  browser_profiles:
