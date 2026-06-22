@@ -174,16 +174,11 @@ async function fetchDashboardData() {
     const [ov, sess, mod, kb] = results
 
     if (ov && typeof ov === 'object') overview.value = ov
-    if (Array.isArray(sess)) sessions.value = sess
-    if (Array.isArray(mod)) models.value = mod
+    sessions.value = sess?.sessions || (Array.isArray(sess) ? sess : [])
+    models.value = mod?.models || (Array.isArray(mod) ? mod : [])
 
-    // Unwrap knowledge total from paginated response
     if (kb) {
-      if (typeof kb.total === 'number') {
-        knowledgeTotal.value = kb.total
-      } else if (Array.isArray(kb)) {
-        knowledgeTotal.value = kb.length
-      }
+      knowledgeTotal.value = kb.total || kb.count || (Array.isArray(kb) ? kb.length : 0)
     }
   } catch (err) {
     console.error('Dashboard fetch error:', err)

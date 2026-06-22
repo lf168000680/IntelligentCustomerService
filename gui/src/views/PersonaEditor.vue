@@ -213,7 +213,7 @@ watch(selectedPersona, () => {
 async function loadPersonas() {
   try {
     const data = await listPersonas()
-    personas.value = Array.isArray(data) ? data : []
+    personas.value = data?.personas || (Array.isArray(data) ? data : [])
     if (personas.value.length > 0) {
       const first = personas.value[0]
       selectedPersona.value = first.name || String(first.id)

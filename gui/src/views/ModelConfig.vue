@@ -294,7 +294,7 @@ async function fetchModels() {
   loading.value = true
   try {
     const data = await listModels()
-    models.value = Array.isArray(data) ? data : []
+    models.value = data?.models || []
   } catch {
     models.value = []
   } finally {

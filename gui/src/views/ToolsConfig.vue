@@ -389,7 +389,7 @@ async function fetchTools() {
   loading.value = true
   try {
     const data = await listTools()
-    tools.value = Array.isArray(data) ? data : []
+    tools.value = data?.tools || (Array.isArray(data) ? data : [])
   } catch {
     // If API not available, use built-in defaults
     tools.value = getDefaultTools()

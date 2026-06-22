@@ -214,3 +214,67 @@ export function restartAdapter(payload) {
 export function testNotification(payload) {
   return http.post('/system/notification/test', payload || {})
 }
+
+// ===== Agent Tools =====
+export function listTools() {
+  return http.get('/system/status').then(r => ({
+    tools: [
+      { name: 'web_search', description: '搜索互联网获取实时信息', category: 'data', enabled: true },
+      { name: 'knowledge_base', description: '查询和更新客服知识库', category: 'knowledge', enabled: true },
+      { name: 'customer_memory', description: '管理客户偏好和购买历史', category: 'knowledge', enabled: true },
+      { name: 'product_lookup', description: '查询商品库存/面料/尺码/物流', category: 'data', enabled: true },
+      { name: 'image_analysis', description: '分析客户上传的图片(瑕疵/色差/OCR)', category: 'media', enabled: true },
+    ]
+  }))
+}
+
+export function updateTool(name, payload) {
+  return http.put(`/system/tool/${name}`, payload || {})
+}
+
+export function testTool(name, payload) {
+  return http.post(`/system/tool/${name}/test`, payload || {})
+}
+
+// ===== MCP Servers =====
+export function listMCPServers() {
+  return http.get('/mcp/servers')
+}
+
+export function addMCPServer(payload) {
+  return http.post('/mcp/servers', payload)
+}
+
+export function deleteMCPServer(name) {
+  return http.delete(`/mcp/servers/${name}`)
+}
+
+export function connectMCPServer(name) {
+  return http.post(`/mcp/servers/${name}/connect`)
+}
+
+// ===== Browser =====
+export function browserAction(payload) {
+  return http.post('/browser/action', payload)
+}
+
+export function browserStatus() {
+  return http.get('/browser/status')
+}
+
+// ===== Cache =====
+export function getCacheStats() {
+  return http.get('/cache/stats')
+}
+
+export function getCacheHitRate() {
+  return http.get('/cache/hit-rate')
+}
+
+export function invalidateCache(payload) {
+  return http.post('/cache/invalidate', null, { params: payload })
+}
+
+export function toggleCache() {
+  return http.put('/cache/toggle')
+}
