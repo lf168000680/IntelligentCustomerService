@@ -1,5 +1,4 @@
 services:
-  # ===== 数据库 =====
   postgres:
     image: pgvector/pgvector:pg16
     container_name: kefu-postgres
@@ -33,17 +32,19 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # ===== 后端服务 =====
   server:
     build:
       context: .
       dockerfile: server/Dockerfile
     container_name: kefu-server
-    env_file: .env
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
+      POSTGRES_DB: kefu
+      POSTGRES_USER: kefu
+      POSTGRES_PASSWORD: kefu_secret_change_me
       REDIS_URL: redis://redis:6379/0
+      DEBUG: "false"
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8800
     ports:
@@ -53,13 +54,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./config:/app/config
-      - ./data:/app/data
-      - ./logs:/app/logs
     restart: unless-stopped
 
-  # ===== GUI 管理面板 =====
   gui:
     build:
       context: .
