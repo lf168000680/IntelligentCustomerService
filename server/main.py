@@ -1,6 +1,7 @@
 """
 Kefu - 智能电商客服系统
 主入口
+使用方式: 从项目根目录运行 python -m server.main
 """
 import sys
 import asyncio
@@ -30,15 +31,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from config import config as app_config
-from llm.router import router as llm_router
-from engine.core import CoreEngine
-from engine.persona import get_persona
-from bus.message_bus import MessageBus
-from knowledge.learning_pipeline import KnowledgeLearningPipeline
-from adapters.session_manager import SessionManager
-from scheduler.jobs import JobScheduler
-from db.base import engine as db_engine, init_db
+# 使用相对导入, 避免与项目根目录的 config/ 冲突
+from .config import config as app_config
+from .llm.router import router as llm_router
+from .engine.core import CoreEngine
+from .engine.persona import get_persona
+from .bus.message_bus import MessageBus
+from .knowledge.learning_pipeline import KnowledgeLearningPipeline
+from .adapters.session_manager import SessionManager
+from .scheduler.jobs import JobScheduler
+from .db.base import engine as db_engine, init_db
 
 
 # ===== FastAPI 应用 =====
@@ -77,7 +79,7 @@ async def startup():
     logger.info("=" * 50)
 
     # 0. 确保所有模型已注册 (必须在 init_db 之前导入)
-    from db.models import (
+    from .db.models import (
         Conversation, UserProfile, KnowledgeItem, KnowledgeEmbedding,
         ConversationEmbedding, KnowledgeReview, KnowledgeGap, Product,
         LLMProviderRecord, PersonaRecord, DailyStats, AlertRecord,
@@ -92,9 +94,9 @@ async def startup():
 
     # 2. 种子模型模板到数据库 (首次启动)
     try:
-        from db.base import async_session as _session
+        from .db.base import async_session as _session
         async with _session() as db:
-            from config import seed_models_to_db
+            from .config import seed_models_to_db
             await seed_models_to_db(db)
             logger.info("Model templates seeded to DB")
     except Exception as e:
@@ -102,9 +104,9 @@ async def startup():
 
     # 3. 从数据库加载模型 (含 API Key) 并注册到 Router
     try:
-        from db.base import async_session as _session2
+        from .db.base import async_session as _session2
         async with _session2() as db:
-            from config import load_models_from_db
+            from .config import load_models_from_db
             app_config.models = await load_models_from_db(db)
             logger.info(f"Loaded {len(app_config.models)} models from DB")
     except Exception as e:
@@ -127,9 +129,10 @@ async def startup():
 
     # Initialize agent tools
     try:
-        from tools import init_tools
+        from .tools import init_tools
+        from .db.base import async_session as _as_for_tools
         tool_registry = await init_tools(
-            db_factory=async_session,
+            db_factory=_as_for_tools,
             llm_router=llm_router
         )
         logger.info(f"Agent tools initialized: {len(tool_registry.list_all())} tools")
@@ -138,12 +141,12 @@ async def startup():
 
     # 5.5. 缓存系统初始化
     try:
-        from cache import cache_manager
+        from .cache import cache_manager
         await cache_manager.connect()
         # 预热: 将知识库FAQ加载到缓存
         try:
-            from db.base import async_session as _sess
-            from db.models import KnowledgeItem
+            from .db.base import async_session as _sess
+            from .db.models import KnowledgeItem
             from sqlalchemy import select
             async with _sess() as db:
                 result = await db.execute(
@@ -160,7 +163,7 @@ async def startup():
 
     # 7. MCP 客户端 + 工具注册
     try:
-        from mcp import mcp_client
+        from .mcp import mcp_client
         mcp_results = await mcp_client.connect_all()
         mcp_connected = sum(1 for v in mcp_results.values() if v)
         # 将 MCP 工具注册到 Agent 工具系统
@@ -171,7 +174,7 @@ async def startup():
 
     # 8. Browser 适配器 (agent-browser 集成)
     try:
-        from browser import browser_adapter
+        from .browser import browser_adapter
         browser_adapter.mcp = mcp_client
         logger.info("Browser adapter ready (agent-browser via MCP)")
     except Exception as e:
@@ -228,14 +231,14 @@ async def shutdown():
 
     # MCP 断开
     try:
-        from mcp import mcp_client
+        from .mcp import mcp_client
         await mcp_client.disconnect_all()
     except Exception:
         pass
 
     # 缓存关闭
     try:
-        from cache import cache_manager
+        from .cache import cache_manager
         await cache_manager.close()
     except Exception:
         pass
@@ -267,7 +270,7 @@ async def health():
 
 
 # 导入 API 路由
-from api.routes import chat, knowledge, persona, models, analytics, system, mcp, browser, cache
+from .api.routes import chat, knowledge, persona, models, analytics, system, mcp, browser, cache
 
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(knowledge.router, prefix="/api/knowledge", tags=["Knowledge"])
@@ -284,7 +287,7 @@ app.include_router(cache.router, prefix="/api/cache", tags=["Cache"])
 
 def main():
     uvicorn.run(
-        "main:app",
+        "server.main:app",
         host=app_config.server_host,
         port=app_config.server_port,
         reload=app_config.debug,

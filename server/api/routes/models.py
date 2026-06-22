@@ -42,7 +42,7 @@ class ModelUpdateRequest(BaseModel):
 
 def _get_router():
     """延迟获取 LLM Router"""
-    import main
+    from server import main
     return main.llm_router
 
 

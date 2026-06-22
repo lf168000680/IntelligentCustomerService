@@ -71,7 +71,7 @@ async def update_persona_file(persona_name: str, filename: str, update: PersonaF
 
     # 刷新全局 Persona 缓存
     global _default_persona
-    import main
+    from server import main
     if hasattr(main, 'engine') and main.engine:
         main.engine.persona.reload()
 
@@ -89,7 +89,7 @@ async def update_persona(persona_name: str, update: PersonaUpdate):
         filepath.write_text(content, encoding="utf-8")
 
     # 刷新
-    import main
+    from server import main
     if hasattr(main, 'engine') and main.engine:
         main.engine.persona.reload()
 
@@ -99,7 +99,7 @@ async def update_persona(persona_name: str, update: PersonaUpdate):
 @router.post("/preview")
 async def preview_persona(req: PreviewRequest):
     """预览人设效果 - 发送测试消息"""
-    import main
+    from server import main
 
     if not main.engine:
         raise HTTPException(status_code=503, detail="Engine not ready")

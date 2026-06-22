@@ -10,7 +10,7 @@ router = APIRouter()
 @router.get("/overview")
 async def get_overview():
     """获取数据概览"""
-    import main
+    from server import main
 
     return {
         "llm_status": main.llm_router.get_status() if main.llm_router else {},
@@ -42,7 +42,7 @@ async def get_top_issues(limit: int = 10):
 @router.get("/model-usage")
 async def get_model_usage():
     """获取各模型使用统计"""
-    import main
+    from server import main
     if not main.llm_router:
         return {"models": []}
 
