@@ -48,7 +48,7 @@ services:
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8800
     ports:
-      - "8800:8800"
+      - "8802:8800"
     depends_on:
       postgres:
         condition: service_healthy

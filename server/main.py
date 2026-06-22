@@ -140,7 +140,8 @@ async def startup():
             db_factory=_as_for_tools,
             llm_router=llm_router
         )
-        logger.info(f"Agent tools initialized: {len(tool_registry.list_all())} tools")
+        tools_list = await tool_registry.list_tools()
+        logger.info(f"Agent tools initialized: {len(tools_list)} tools")
     except Exception as e:
         logger.warning(f"Tool initialization skipped: {e}")
 
