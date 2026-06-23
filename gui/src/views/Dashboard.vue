@@ -174,8 +174,26 @@ async function fetchDashboardData() {
     const [ov, sess, mod, kb] = results
 
     if (ov && typeof ov === 'object') overview.value = ov
+
+    // sessions: handle {sessions: [...]} or []
     sessions.value = sess?.sessions || (Array.isArray(sess) ? sess : [])
-    models.value = mod?.models || (Array.isArray(mod) ? mod : [])
+
+    // models: backend returns {models: {name: info, ...}} as object, convert to array
+    const rawModels = mod?.models || (Array.isArray(mod) ? mod : {})
+    if (Array.isArray(rawModels)) {
+      models.value = rawModels
+    } else if (rawModels && typeof rawModels === 'object') {
+      models.value = Object.entries(rawModels).map(([name, info]) => ({
+        name,
+        id: name,
+        healthy: info?.healthy ?? true,
+        provider: info?.provider,
+        model: info?.model,
+        ...info
+      }))
+    } else {
+      models.value = []
+    }
 
     if (kb) {
       knowledgeTotal.value = kb.total || kb.count || (Array.isArray(kb) ? kb.length : 0)
