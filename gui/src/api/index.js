@@ -50,11 +50,11 @@ http.interceptors.response.use(
 //  Chat
 // ===========================================================================
 export function sendMessage(payload) {
-  return http.post('/chat/message', payload)
+  return http.post('/chat/send', payload)
 }
 
 export function testPersona(personaId, payload) {
-  return http.post(`/persona/${personaId}/test`, payload)
+  return http.post('/persona/preview', { persona_name: personaId, ...payload })
 }
 
 export function getSessions(params) {
@@ -85,15 +85,15 @@ export function deleteKnowledge(id) {
 }
 
 export function getReviewQueue(params) {
-  return http.get('/knowledge/review-queue', { params })
+  return http.get('/knowledge/reviews', { params })
 }
 
 export function approveReview(id, payload) {
-  return http.post(`/knowledge/review/${id}/approve`, payload || {})
+  return http.post(`/knowledge/reviews/${id}/approve`, payload || {})
 }
 
 export function rejectReview(id, payload) {
-  return http.post(`/knowledge/review/${id}/reject`, payload || {})
+  return http.post(`/knowledge/reviews/${id}/reject`, payload || {})
 }
 
 export function triggerLearning(payload) {
@@ -104,17 +104,11 @@ export function triggerLearning(payload) {
 //  Persona
 // ===========================================================================
 export function listPersonas(params) {
-  return http.get('/persona', { params })
+  return http.get('/persona/list', { params })
 }
 
 export function getPersona(id) {
   return http.get(`/persona/${id}`)
-}
-
-export function updatePersonaFile(id, formData) {
-  return http.put(`/persona/${id}/file`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  })
 }
 
 export function updatePersona(id, payload) {
@@ -122,11 +116,11 @@ export function updatePersona(id, payload) {
 }
 
 export function previewPersona(id, payload) {
-  return http.post(`/persona/${id}/preview`, payload || {})
+  return http.post('/persona/preview', { persona_name: id, ...payload })
 }
 
 export function compilePrompt(id, payload) {
-  return http.post(`/persona/${id}/compile`, payload || {})
+  return http.get(`/persona/${encodeURIComponent(id)}/compile`, { params: payload })
 }
 
 // Persona file operations (by persona name)
@@ -200,15 +194,15 @@ export function getStatus() {
 }
 
 export function startAdapter(payload) {
-  return http.post('/system/adapter/start', payload || {})
+  return http.post('/system/adapters/start', payload || {})
 }
 
 export function stopAdapter(payload) {
-  return http.post('/system/adapter/stop', payload || {})
+  return http.post('/system/adapters/stop', payload || {})
 }
 
 export function restartAdapter(payload) {
-  return http.post('/system/adapter/restart', payload || {})
+  return http.post('/system/adapters/restart', payload || {})
 }
 
 export function testNotification(payload) {

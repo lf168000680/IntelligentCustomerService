@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, List
 from pathlib import Path
 
-from ...engine.persona import get_persona, PersonaBuilder, PERSONAS_DIR
+from ...engine.persona import get_persona as get_persona_builder, PersonaBuilder, PERSONAS_DIR
 
 router = APIRouter()
 
@@ -107,7 +107,7 @@ async def preview_persona(req: PreviewRequest):
     # 临时使用指定人设
     original = main.engine.persona
     if req.persona_name != original.persona_name:
-        main.engine.persona = get_persona(req.persona_name)
+        main.engine.persona = get_persona_builder(req.persona_name)
         reply = await main.engine.test_persona(req.message)
         main.engine.persona = original
     else:
@@ -124,7 +124,7 @@ async def preview_persona(req: PreviewRequest):
 async def compile_prompt(persona_name: str):
     """查看编译后的 System Prompt"""
     try:
-        builder = get_persona(persona_name)
+        builder = get_persona_builder(persona_name)
         prompt = builder.build_system_prompt()
         return {
             "name": persona_name,
